@@ -177,3 +177,152 @@ create(42); // 报错
 create("string"); // 报错
 create(false); // 报错
 ```
+
+## 函数
+### 函数的定义
+和JavaScript一样，TypeScript函数可以创建有名字的函数和匿名函数。 你可以随意选择适合应用程序的方式，不论是定义一系列API函数还是只使用一次的函数。
+定义有名字的函数:
+```
+function fn(){
+  return 123;
+}
+console.log(fn())
+```
+定义匿名函数:
+```
+let fn1 = function(){
+  return 456;
+}
+console.log(fn1())
+```
+### 函数定义类型
+函数类型包含两个部分：参数类型和返回值类型。当写出完整函数的时候，两部分类型都是需要的。我们需要给每个参数添加类型之后再为函数本身添加返回值类型。
+```
+function fn3(name:string,age:number):string{
+  return `${name}的年龄是${age}岁`
+}
+console.log(fn3('小明',25))
+
+```
+如果函数没有返回值，那么函数返回值类型是void
+```
+function fn4():void{
+  console.log('这是一个没有返回值的函数')
+}
+console.log(fn4())
+
+```
+### 可选参数
+在javascript中，函数的实参和形参可以不一致，也就是说实参的个数和形参的个数可以不相同。比如：下面的函数形参要求两个参数，但是实参只传递了一个参数。这种情况在js中不会报错。
+```
+function fn5(name,age){
+  console.log(`${name}的年龄是${age}`)
+}
+
+fn5('小红')
+```
+但是在ts中，实参个数和形参个数必须一致。如果不一样就需要配置可选参数。将没有传入的参数设置为可选参数。通过在可传可不传的参数类型前面加上?表示该参数为可选参数。
+```
+function fn5(name:string,age?:number):void{
+  if(age){
+    console.log(`${name}的年龄是${age}`);
+  }else{
+    console.log(`${name}`);
+  }
+}
+fn5('小红')
+fn5('小红',20)
+```
+**注意：可选参数最好放到参数最后面**
+### 默认参数
+在ES6中我们可以在参数后面直接设置默认参数
+```
+function fn6(name, age = 40) {
+  if (age) {
+      console.log(name + "\u7684\u5E74\u9F84\u662F" + age);
+  }
+  else {
+      console.log("" + name);
+  }
+}
+fn6('小红');
+fn6('小红', 20);
+
+```
+同样在ts中，我们可以在参数类型后面设置默认参数:
+```
+function fn6(name:string,age:number = 50):void{
+  if(age){
+    console.log(`${name}的年龄是${age}`);
+  }else{
+    console.log(`${name}`);
+  }
+}
+fn6('小明')
+fn6('小明',20)
+```
+### 剩余参数
+在前面我们知道在ts中，形参的个数和实参的个数必须是一致的。但是有些情况下我们并不知道实参个数究竟是多少。实参的个数有可能取决于用户的输入。我们不可能每次都根据实参的个数来修改用户的输入。比如：计算多个数的和：
+```
+function sum(a:number,b:number,c:number):number{
+  return a + b + c;
+}
+console.log(sum(1,2,3))
+console.log(sum(1,2,3,4))
+console.log(sum(1,2,3,4,5))
+```
+我们可以观察到：用户可能需要求得是三个数的和，也可能需要求得是四个数的和。也可能需要求得是五个数的和。我们不能可能每次都根据用户的输入来修改形参的个数。在js中我们通过arguments来收集所有的参数。arguments是一个伪数组。在ts中我们同样通过一个数组来收集所有的参数。只不过这个数组编译器会帮助我们创建。名字是...后面的变量名字。
+```
+function sum(a:number,...rest:number[]):number{
+    let sum = 0;
+    for(let i = 0;i < rest.length;i++){
+      sum += rest[i]
+    }
+    return sum;
+}
+console.log(sum(1,2,3))
+console.log(sum(1,2,3,4))
+console.log(sum(1,2,3,4,5))
+
+
+```
+### 函数的重载
+JavaScript本身是个动态语言。 JavaScript里函数根据传入不同的参数而返回不同类型的数据是很常见的。比如：
+```
+const person1 = {
+  name:'小明',
+  age:24,
+  sex:'男'
+}
+const person2 = ['小红',26,'女']
+function info(person){
+  // 判断传递进来的参数类型
+  if(Array.isArray(person) == true){
+    //如果是数组...
+    console.log(`${person[0]}的年龄是${person[1]}性别是${person[2]}`)
+  }else{
+    //如果是对象...
+    console.log(`${person.name}的年龄是${person.age}性别是${person.sex}`)
+  }
+}
+console.log(fn7(person1))
+console.log(fn7(person2))
+```
+info函数会根据传递进来的参数类型，来进行相应的操作。ts中重载的实现是通过为同一个函数提供
+多个函数类型定义来进行函数重载。
+```
+function fn7(person:[string,number,string]):string;  // 第一个函数类型定义
+function fn7(person:object):string;// 第二个函数类型定义
+function fn7(person:any):any{
+  // 判断传递进来的参数类型
+  if(Array.isArray(person) == true){
+    //如果是数组...
+    console.log(`${person[0]}的年龄是${person[1]}性别是${person[2]}`)
+  }else{
+    //如果是对象...
+    console.log(`${person.name}的年龄是${person.age}性别是${person.sex}`)
+  }
+}
+console.log(fn7(person1))
+console.log(fn7(person2))
+```
