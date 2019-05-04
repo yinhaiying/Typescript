@@ -724,3 +724,129 @@ let myDog = new MyDog('骨头','篮球')
 myDog.eat()
 myDog.play()
 ```
+## 泛型
+软件工程中，我们不仅要创建一致的定义良好的API，同时也要考虑可重用性。 组件不仅能够支持当前的数据类型，同时也能支持未来的数据类型，这在创建大型系统时为你提供了十分灵活的功能。
+### 泛型函数
+以函数为例，我们平常在定义函数的时候，函数的参数是指定类型，函数的输出也是指定类型。这样的话函数的可复用性就比较小了。如果下一次想要实现跟这个函数相同的功能，只是传入参数和输出参数的类型不同。这样就需要重新定义一个函数。
+我们通过一段代码来举例：
+
+```
+function getInfo(name:string):string{
+  return name;
+}
+
+getInfo('张三'); // 正确
+getInfo(123); // 报错
+
+```
+我们定义了一个函数getInfo用于获取个人信息。他要求参数必须是string类型，输出也是string类型。当我们获取名字的时候没有问题。假设我们需要获取年龄,id等number类型的信息。这时候就不能通过这个函数了。我们需要重新定义一个实现类似功能的函数。
+```
+function getInfo2(age:number):number{
+  return age
+}
+```
+这样的话就需要重复地定义相同功能的函数。但是其实这些函数只是传入参数和输出参数类型的不同。这样重复定义使得代码非常冗余，复用性差。当然我们可以通过定义参数类型为any类型。这样就可以传入任何类型的参数，输出任何类型的参数。如下所示：
+```
+function getInfo2(value:any):any{
+  return value;
+}
+
+console.log( getInfo2('张三') );
+console.log( getInfo2(123));
+```
+这样虽然解决了参数问题，但是实际上我们抛弃了参数的类型校验。而且很多情况下我们其实需要通过输入的类型来规范输出的类型。比如输入是什么类型，输出也是什么类型。这样的话通过any就无法实现了。
+
+**因此，我们需要一种方法使返回值的类型与传入参数的类型是相同的。 这里，我们使用了 类型变量，它是一种特殊的变量，只用于表示类型而不是值。**
+```
+function getInfo3<T>(value:T):T{
+  return value;
+}
+```
+我们给identity添加了类型变量T。 T帮助我们捕获用户传入的类型(将参数类型设置为类型变量T)。之后我们就可以使用这个类型。 之后我们再次使用了 T当做返回值类型。现在我们可以知道参数类型与返回值类型是相同的了。 这允许我们跟踪函数里使用的类型的信息。
+1. 给函数设置类型变量<T>
+2. 将函数的参数类型设置成类型变量(value:T)
+3. 将函数的返回值类型设置成类型变量(T)
+这样的话，我们定义的函数就是一个泛型。
+
+**泛型的调用:**
+泛型的调用有两种方式：
+1. 传入所有的参数，包括类型参数和函数参数
+```
+function getInfo3<T>(value:T):T{
+  return value;
+}
+getInfo3<string>('李四')
+getInfo3<number>(24)
+
+```
+2. 只传入函数参数，编译器会根据传入的参数自动地帮助我们确定T的类型。
+```
+getInfo3('王五')
+getInfo3(26)
+```
+### 泛型类
+泛型类与泛型函数没有什么区别，只不过是在类里面对属性和方法使用了泛型类型。
+
+```
+class Sort{
+  list:number[];
+  constructor(list:number[]){
+    this.list = list;
+  }
+  sort(list:number[]):number{
+    let min= this.list[0];
+    for(let i = 0; i < this.list.length;i++){
+      if(min > this.list[i]){
+        min = this.list[i]
+      }
+    }
+    return min;
+  }
+}
+
+let mySort = new Sort([1,6,2,4,5]);
+mySort.sort([1,6,2,4,0]) // 正确
+mySort.sort(['a','f','z','d']) // 报错
+
+```
+上面我们定义了一个用于找出最小值的类。但是这个类只能找出数字中的最小值。加入将来我们需要找出字母中的最小字母。那么这个类就不太适用了。还是和上面的函数一样，由于对类中的属性和方法中的参数类型进行了限定，因此无法进行扩展。
+下面我们使用泛型类来进行扩展：
+```
+class Sort2<T>{
+  list:T[];
+  constructor(list:T[]){
+    this.list = list;
+  }
+  sort(list:T[]):T{
+    let min= this.list[0];
+    for(let i = 0; i < this.list.length;i++){
+      if(min > this.list[i]){
+        min = this.list[i]
+      }
+    }
+    return min;
+  }
+}
+
+// number类型
+let mySort2 = new Sort2([1,6,2,4,5]);
+console.log(mySort2.sort([1,6,2,4,0]))
+// string类型
+let mySort3 = new Sort2(['a','f','z','d']);
+console.log(mySort3.sort(['a','f','z','d']))
+
+```
+1. 在类名后面使用<T>表示这是一个泛型类。
+2. 类中所有的属性和方法，如果需要与泛型类型一致。可以将其类型设置成T。
+
+
+### 泛型接口
+```
+interface SortFn {
+    <T>(value: T): T;
+}
+let mySort: SortFn = function<T>(value: T):T {
+    return value;
+}
+mySort<string>('a')
+```
