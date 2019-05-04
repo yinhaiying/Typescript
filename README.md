@@ -590,3 +590,137 @@ let dog = new Dog('骨头','篮球')
 dog.eat()
 dog.play()
 ```
+## 五、接口
+### 接口的理解
+首先，我们谈论一下现实生活中的接口。比如生活中常用的插座接口，有些插头是三孔插座的，有些是两孔插座的。插座接口规定了插头的数目，那么我们的电器使用时就只能是这些数目的插头，要么是两孔，要么是三孔。很少见到有电器设备使用五孔、十孔的。因为你不符合规范，没地方使用。
+
+同理，在编程中接口也是用来定义规范的。我们之前介绍的抽象类，也是一种规范，只不过它是对类的一种规范，它要求所有的子类都必须实现抽象类中的抽象方法。而接口不仅仅是类的规范，它是属性、类、方法等的规范。
+
+### 属性类型接口
+属性类型接口主要是针对对象进行约束。
+在没有使用接口之前，我们定义函数时，或者使用变量时都会对类型进行校验。
+```
+function getInfo(person:{name:string,age:number}):void{
+  console.log(`姓名:${person.name},年龄是${person.age}`)
+}
+
+getInfo({name:'hello',age:24})  // 需要传入一个对象，对象中包含有string类型的name和number类型的age
+getInfo({name:'hello'})  // 报错 缺少age属性
+getInfo({name:'hello',age:'24'})  // 报错age属性为number
+```
+上面我们定义了getInfo函数。它要求传入一个对象，对象中对象中包含有string类型的name属性和number类型的age属性。其实这就是一种规范，这里规范了传入参数的类型。
+**我们通过接口来实现这个规范：**
+```
+interface PersonInterface{
+  name:string;  // 这里是分号；
+  age:number
+}
+
+// 这里的传给person的是一个对象
+function getInfo(person:personInterface):void{
+  console.log(`姓名:${person.name},年龄是${person.age}`)
+}
+
+getInfo({name:'刘亦菲',age:30})
+```
+**接口的可选属性**
+接口里的属性不全都是必需的。 有些是只在某些条件下存在，或者根本不存在。 可选属性通常应用于函数的可选参数。
+```
+interface PersonInterface{
+  name:string;  // 这里是分号；
+  age:number;
+  salary?:number;
+}
+```
+**接口的只读属性**
+一些对象属性只能在对象刚刚创建的时候修改其值。 你可以在属性名前用 readonly来指定只读属性:
+```
+interface Point{
+  readonly x:number;
+  readonly y:number;
+}
+
+function getPoint(point:Point):void{
+  console.log(`坐标x:${point.x},坐标y:${point.y}`)
+}
+let point1:Point = {
+  x:13,
+  y:14
+}
+getPoint(point1)
+
+point1.x = 100; // 报错。readonly的接口在第一次赋值后就无法进行修改了
+getPoint(point)
+```
+上面定义的Point接口属性都是只读的。我们定义了point1实现了Point接口。可以正常进行调用。但是当我们打算修改point1
+的值得时候。就会出现报错。因为readonly的接口在第一次赋值后就无法进行修改了。
+### 函数类型接口
+函数类型接口是对方法传入的参数以及返回值进行约束。
+
+为了使用接口表示函数类型，我们需要给接口定义一个调用签名。 它就像是一个只有参数列表和返回值类型的函数定义,不需要function关键字，也不需要函数体。参数列表里的每个参数都需要名字和类型。
+```
+interface BarFunc{
+  (name:string,age:number):string;
+}
+```
+定义使用函数接口的函数.其实之前的类型校验就是一种规范。通过在变量后面使用:类型进行校验。接口也是规范。
+因此通过:接口就相当于对接口进行校验。
+```
+interface BarFunc{
+  (name:string,age:number):string;
+}
+// 使用函数类型的接口
+let bar:BarFunc = function(name:string,age:number):string{
+  return `姓名:${name},年龄:${age}`
+}
+bar('张三',24)
+```
+### 可索引类型接口
+可索引类型接口是对数组的约束。对数组的约束主要是对数组中元素类型进行约束。在ts中定义数组时，其实我们已经对数组元素类型进行了约束.
+**定义数组：对类型进行约束**
+```
+let myArr:string[] = ['hello','world'];
+
+```
+**通过接口来实现对数组元素的约束:**
+```
+interface Arr {
+  [index:number]:string;
+}
+
+let arr:Arr = ['hello','world']
+// let arr:Arr = [1,'world']; 报错。元素类型必须是strig
+```
+上面Arr接口表示索引必须是number类型。数组中元素必须是string类型。
+
+### 类类型接口
+类类型接口是对类的约束。和抽象类有点相似。抽象类是子类的基类，定义了子类必须实现的抽象方法。但是类接口不是针对子类，而是所有的类。类接口中定义了所有的类必须实现的属性和方法。
+```
+interface AnimalClass{
+  food:string;
+  ball:string;
+  eat():void;
+  play():void;
+}
+```
+实现接口的类必须有接口中的属性和接口中的方法。
+```
+class MyDog implements AnimalClass{
+  food:string;
+  ball:string;
+  constructor(food:string,ball:string){
+    this.food = food;
+    this.ball = ball;
+  }
+  eat():void{
+    console.log('狗吃' + this.food)
+  }
+  play():void{
+    console.log('狗玩' + this.ball)
+  }
+}
+
+let myDog = new MyDog('骨头','篮球')
+myDog.eat()
+myDog.play()
+```
