@@ -178,7 +178,7 @@ create("string"); // 报错
 create(false); // 报错
 ```
 
-## 函数
+## 三、函数
 ### 函数的定义
 和JavaScript一样，TypeScript函数可以创建有名字的函数和匿名函数。 你可以随意选择适合应用程序的方式，不论是定义一系列API函数还是只使用一次的函数。
 定义有名字的函数:
@@ -325,4 +325,268 @@ function fn7(person:any):any{
 }
 console.log(fn7(person1))
 console.log(fn7(person2))
+```
+## 四、类
+### 类的实现
+在ES6中新增了类的概念。我们先看ES6中类的实现。
+```
+class Person {
+  constructor(name,age){
+    this.name = name;
+    this.age = age;
+  }
+  getName(){
+    return this.name;
+  }
+}
+let p1 = new Person('小张',24)
+console.log(p1.getName())
+
+```
+在ts中类的定义。ts中类的定义跟ES6差别不大。只是ts中新增了对属性的类型的校验。因此我们在使用属性之前必须先定义属性的类型。比如下面Person类中的name和age属性。在constructor和getName中使用之前必须先指定其类型。
+```
+class Person {
+  // 指定参数类型
+  name:string;
+  age:number;
+  constructor(name:string,age:number){
+    this.name = name;
+    this.age = age;
+  }
+
+  getName():string{
+    return this.name;
+  }
+
+}
+
+let p1 = new Person('小红',24)
+console.log(p1.getName())
+```
+### 类的继承
+ES6中的继承:在ES6中通过extends和super来实现继承。
+```
+// ES6中的继承
+class Student extends Person{
+  constructor(name,age,sex){
+    super(name,age);
+    this.sex = sex;
+  }
+  getSex(){
+    return this.sex
+  }
+}
+
+let s = new Student('小李',25,'男')
+console.log(s.getName())
+console.log(s.getSex())
+```
+ts中类的继承和ES6中非常相似。
+```
+class Person {
+  // 指定参数类型
+  name:string;
+  age:number;
+  constructor(name:string,age:number){
+    this.name = name;
+    this.age = age;
+  }
+
+  getName():string{
+    return this.name;
+  }
+
+}
+
+let p1 = new Person('小红',24)
+console.log(p1.getName())
+
+// 类的继承
+class Student extends Person{
+  sex:string;
+  constructor(name:string,age:number,sex:string){
+    super(name,age);
+    this.sex = sex;
+  }
+  getSex():string{
+    return this.sex
+  }
+}
+
+```
+### 修饰符
+在ts中定义属性的时候，提供了三种修饰符。分别是public,protected和private。这三种修饰符用来表示属性能够被访问的范围。
+```
+public    表示公有的 可以在类中，类外面，子类中被访问。
+
+protected  表示被保护的类型 可以在类中和子类中被访问。不能在类外面被访问。
+
+private 表示私有类型 可以在类中访问。在子类和类外部都无法访问。
+```
+1. **public、protected和private修饰符定义的属性在类内部都可以被访问。**
+```
+class Human {
+  // 指定参数类型
+ public name:string;
+ protected age:number;
+ private salary:string;
+  constructor(name:string,age:number,salary:string){
+    this.name = name;
+    this.age = age;
+    this.salary = salary;
+  }
+  getName():string{
+    return this.name;
+  }
+  getAge():number{
+    return this.age;
+  }
+  getSalary():string{
+    return this.salary;
+  }
+}
+```
+2. **public修饰符定义的属性在类外部可以被访问。protected和private修饰符定义的属性在类外部无法被访问。**
+当我们在外部访问privagte定义的属性时，会出现报错。
+这里的salary是private修饰的属性，无法进行设置。
+```
+let h2 = new Person('小红',24,10000) // Expected 2 arguments, but got 3.
+console.log(h1.getAge()); // 报错 protected修饰的age属性无法在外部被访问。
+```
+3. **public和protected修饰符定义的属性可以在子类中被访问。但是private修饰符定义的属性无法在子类中访问。**
+比如，当子类继承父类。调用super()方法时，如果传入了父类中私有的属性那么会报错。如果在子类方法中想要获取父类
+私有属性也会报错。
+```
+class People extends Person{
+  constructor(name:string,age:number,sex:string){
+    super(name,age,sex);  // 报错
+  }
+  getSex():string{
+    return this.sex;  // 报错
+  }
+}
+```
+**readonly修饰符**
+在ts中还提供了readonly修饰符来将属性设置为只读。只读属性必须在生明时或者构造函数中被初始化。
+```
+class Teacher {
+  readonly name:string;
+  constructor(name:string){
+    this.name = name;
+  }
+  getName():string{
+    return this.name
+  }
+}
+
+let t = new Teacher('张三')
+console.log(t.name);
+console.log(t.getName());
+t.name = '李四'  // 修改readonly 修饰的属性时报错。
+```
+
+### 静态方法
+在ES6中，所有在类中定义的方法，都会被实例继承。如果在一个方法前，加上static关键字，就表示该方法不会被实例继承，而是直接通过类来调用，这就称为“静态方法”。
+```
+class Foo{
+  constructor(name,age){
+    this.name = name;
+    this.age = age;
+  }
+  getName(){
+    return this.name;
+  }
+  static getAge(){
+    return this.age;
+  }
+}
+
+let f  = new Foo('刘亦菲',24);
+console.log(f.getName())  // 刘亦菲
+console.log(Foo.getAge()) // undefined 这里的this指的是类Foo
+console.log(f.getAge()) // 静态方法无法被实例调用
+```
+ts中静态方法的使用:通过使用static关键字定义静态属性和静态方法。
+静态属性和静态方法只能通过类名来进行访问。实例和this都无法进行访问。
+```
+// 静态方法
+class Foo{
+  // 静态属性
+  static obj = {
+    name:'刘亦菲',
+    age:30
+  }
+  public name:string
+  constructor(name:string){
+    this.name = name;
+  }
+  // 静态方法
+  static getAge(){
+    // 调用静态属性时需要使用类来调用。
+    return Foo.obj.age
+  }
+  getName(){
+    return this.name
+  }
+}
+
+let f = new Foo('晓明')
+console.log(Foo.getAge())  // 调用静态方法
+console.log(f.getName())  // 调用实例方法
+
+```
+### 抽象类
+
+抽象类是作为其他继承类的基类使用。他们一般不会被实例化。在ts中用abstract定义抽象类和抽象方法。
+```
+abstract class Animal{
+  abstract eat():any;
+}
+```
+1. 抽象类无法被实例化
+```
+abstract class Animal{
+  abstract eat():any;
+}
+let a = new Animal() // 报错Cannot create an instance of an abstract class
+
+```
+2. 抽象类中的抽象方法，不包含具体实现。只定义方法签名，不定义方法体。
+```
+abstract class Animal{
+  abstract eat():any; // 只有方法名，没有方法体
+  abstract play:any{} // 报错  抽象方法不能有实现，也就是说不能有方法体。
+}
+```
+3. 抽象类的子类必须实现抽象类中的抽象方法。
+```
+// 抽象类
+abstract class Animal{
+  protected food:string;
+  protected ball:string;
+  constructor(food:string,ball:string){
+    this.food = food;
+    this.ball = ball;
+  }
+  abstract eat():any;
+  abstract play():any;
+}
+
+// 子类
+class Dog extends Animal{
+  constructor(food:string,ball:string){
+    super(food,ball)
+  }
+  // 必须实现抽象类中的抽象方法
+  eat(){
+    console.log(`小狗在吃${this.food}`)
+  }
+  play(){
+    console.log(`小狗在玩${this.ball}`)
+  }
+}
+
+let dog = new Dog('骨头','篮球')
+dog.eat()
+dog.play()
 ```
